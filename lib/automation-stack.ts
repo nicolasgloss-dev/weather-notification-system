@@ -4,6 +4,15 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as events from 'aws-cdk-lib/aws-events';
 import * as targets from 'aws-cdk-lib/aws-events-targets';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import * as sns from 'aws-cdk-lib/aws-sns'; // ✅ Needed for props.notificationsTopic
+
+// -----------------------------------------------------------------------------
+// Props Interface — allows SNS Topic to be passed in from the main stack.
+// This avoids duplication and enables proper cross-stack architecture.
+// -----------------------------------------------------------------------------
+export interface WeatherAutomationStackProps extends cdk.StackProps {
+  notificationsTopic: sns.Topic; // ✅ Reuse the existing SNS topic from main stack
+}
 
 // -----------------------------------------------------------------------------
 // WeatherAutomationStack
@@ -13,7 +22,7 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 // EventBridge to trigger a Lambda function on a recurring schedule.
 // -----------------------------------------------------------------------------
 export class WeatherAutomationStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props: WeatherAutomationStackProps) { // ✅ Accept correct props interface
     super(scope, id, props);
 
     // -------------------------------------------------------------------------
@@ -33,16 +42,24 @@ export class WeatherAutomationStack extends cdk.Stack {
       handler: 'automationHandler.main',
       code: lambda.Code.fromAsset('lambda/automation'),
       description: 'Handles weather-triggered AWS automation tasks',
-      memorySize: 128,
-      timeout: cdk.Duration.seconds(10),
+      memorySize: 256,
+      timeout: cdk.Duration.seconds(15),
+
+      // Explicit, intentional env var — clear this is for automation logic
+      environment: {
+        AUTOMATION_TOPIC_ARN: props.notificationsTopic.topicArn, // Wired from main stack
+      },
     });
+
+    // Grant permission for the Lambda to publish to the notifications topic.
+    props.notificationsTopic.grantPublish(automationHandler);
 
     // -------------------------------------------------------------------------
     // EventBridge Rule - WeatherAutomationRule
     // -------------------------------------------------------------------------
-    // This rule triggers the automation Lambda on a regular schedule.
-    // In this demo, it runs every 3 hours. In a real-world setup, it could
-    // trigger based on live weather data or SNS notifications.
+    // Runs every 3 hours to simulate automation behaviour
+    // In production, this rule could be adjusted to trigger based on live weather
+    // data or SNS notifications.
     // -------------------------------------------------------------------------
     const weatherAutomationRule = new events.Rule(this, 'WeatherAutomationRule', {
       schedule: events.Schedule.rate(cdk.Duration.hours(3)),
@@ -53,10 +70,10 @@ export class WeatherAutomationStack extends cdk.Stack {
     weatherAutomationRule.addTarget(new targets.LambdaFunction(automationHandler));
 
     // -------------------------------------------------------------------------
-    // Permissions - Example of least privilege.
+    // IAM Permissions - Principle of Least Privilege.
     // -------------------------------------------------------------------------
-    // The Lambda only needs basic permissions for logging and (optionally)
-    // to publish messages or trigger other resources.
+    // The Lambda is granted only basic permissions to create log streams and log events.
+    // Additional policies can be added later for specific integrations.
     // -------------------------------------------------------------------------
     automationHandler.addToRolePolicy(
       new iam.PolicyStatement({
