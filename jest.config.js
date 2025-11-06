@@ -1,4 +1,4 @@
-/** 
+/**
  * Jest configuration for the Weather Notification System project.
  * This setup allows testing of CDK stacks and Lambda TypeScript code.
  * Using ts-jest lets Jest understand TypeScript files directly.
@@ -18,17 +18,21 @@ module.exports = {
   verbose: true,
   clearMocks: true,
 
-  // TypeScript diagnostics configuration to reduce noisy warnings.
-  globals: {
-    'ts-jest': {
-      diagnostics: {
-        // 151002 warning happens when using hybrid module kinds.
-        // It’s safe to ignore for CDK projects.
-        ignoreCodes: [151002],
-      },
-    },
-  },
-
   // Coverage is optional but useful when testing Lambda logic.
   collectCoverage: false,
+
+  // Modern ts-jest config — replaces deprecated `globals` block.
+  transform: {
+    '^.+\\.tsx?$': [
+      'ts-jest',
+      {
+        tsconfig: 'tsconfig.json',
+        diagnostics: {
+          // 151002 warning happens when using hybrid module kinds.
+          // It’s safe to ignore for CDK projects.
+          ignoreCodes: [151002],
+        },
+      },
+    ],
+  },
 };

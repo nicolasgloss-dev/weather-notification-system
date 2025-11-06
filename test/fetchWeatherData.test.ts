@@ -6,6 +6,12 @@ jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 describe('fetchWeatherData Lambda', () => {
+    // Reset environment variables after each test to avoid cross-test leakage.
+  afterEach(() => {
+    delete process.env.WEATHER_API_KEY;
+    delete process.env.CITY;
+  });
+  
   // This test checks that the function logs a message and exits safely
   // when no real API key is provided.
   test('skips API call when dummy key is used', async () => {

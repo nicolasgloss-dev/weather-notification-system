@@ -1,38 +1,50 @@
 import axios from 'axios';
+import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 
-// This Lambda will later be triggered on a schedule (EventBridge).
-// For now it just connects to the weather API and logs results.
+// NOTE: Daily summary Lambda — this runs at 7AM Sydney time (EventBridge cron).
+// It fetches weather data and will later publish a morning summary.
+
+const secretsClient = new SecretsManagerClient({}); // reuse client to avoid extra cold start cost
 
 export const handler = async () => {
-  // City and API key are passed in through environment variables.
   const city = process.env.CITY || 'Sydney,AU';
-  const apiKey = process.env.WEATHER_API_KEY || 'DUMMY_KEY_FOR_LOCAL_TESTS';
+
+  // This value is only a placeholder for local/testing.
+  // If left as dummy, try to pull the real API key below.
+  let apiKey = process.env.WEATHER_API_KEY || 'DUMMY_KEY_FOR_LOCAL_TESTS';
 
   console.log('[FetchWeather] Starting run for city:', city);
 
-  // When testing locally without a real API key, this block skips the call.
+  // If still using dummy, attempt to fetch the real API key from Secrets Manager.
+  // This avoids committing credentials or hardcoding them in the environment.
   if (apiKey === 'DUMMY_KEY_FOR_LOCAL_TESTS' || apiKey === '') {
+    try {
+      const secret = await secretsClient.send(
+        new GetSecretValueCommand({ SecretId: 'WeatherAPIKey' })
+      );
+      if (secret.SecretString) {
+        apiKey = secret.SecretString;
+        console.log('[FetchWeather] Retrieved real API key from Secrets Manager.');
+      }
+    } catch (err: any) {
+      // If this fails, the function will simply skip the real API call — safe behaviour for dev/test.
+      console.warn('[FetchWeather] Could not retrieve secret, continuing with dummy key.', err?.message);
+    }
+  }
+
+  // If still on dummy key after trying to retrieve, skip external call for safety.
+  if (apiKey === 'DUMMY_KEY_FOR_LOCAL_TESTS') {
     console.log('[FetchWeather] No real API key found, skipping API call.');
     return { ok: true, message: 'Skipped real API call (dummy key).' };
   }
 
   try {
-    // Build the request URL using OpenWeatherMap API format.
-    const url = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(
-      city,
-    )}&appid=${apiKey}&units=metric`;
-
-    // Make the HTTP request to get forecast data.
+    const url = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric`;
     const { data } = await axios.get(url, { timeout: 8000 });
 
-    // Log the length of the list just to confirm data came back.
     console.log('[FetchWeather] Forecast list length:', data?.list?.length ?? 0);
-
-    // Later versions of this function will process the forecast,
-    // look for severe weather, and publish alerts to SNS.
     return { ok: true, count: data?.list?.length ?? 0 };
   } catch (err: any) {
-    // Any network or API error will show up here.
     console.error('[FetchWeather] Error fetching data:', err?.message);
     throw err;
   }

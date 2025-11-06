@@ -4,14 +4,14 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as events from 'aws-cdk-lib/aws-events';
 import * as targets from 'aws-cdk-lib/aws-events-targets';
 import * as iam from 'aws-cdk-lib/aws-iam';
-import * as sns from 'aws-cdk-lib/aws-sns'; // ✅ Needed for props.notificationsTopic
+import * as sns from 'aws-cdk-lib/aws-sns';
 
 // -----------------------------------------------------------------------------
 // Props Interface — allows SNS Topic to be passed in from the main stack.
 // This avoids duplication and enables proper cross-stack architecture.
 // -----------------------------------------------------------------------------
 export interface WeatherAutomationStackProps extends cdk.StackProps {
-  notificationsTopic: sns.Topic; // ✅ Reuse the existing SNS topic from main stack
+  notificationsTopic: sns.Topic;
 }
 
 // -----------------------------------------------------------------------------
@@ -42,16 +42,15 @@ export class WeatherAutomationStack extends cdk.Stack {
       handler: 'automationHandler.main',
       code: lambda.Code.fromAsset('lambda/automation'),
       description: 'Handles weather-triggered AWS automation tasks',
-      memorySize: 256,
-      timeout: cdk.Duration.seconds(15),
-
-      // Explicit, intentional env var — clear this is for automation logic
+      memorySize: 256, // balance of performance and cost
+      timeout: cdk.Duration.seconds(15), // Enough time for quick automation logic
+      // Environment variable for downstream publishing or decision logic
       environment: {
         AUTOMATION_TOPIC_ARN: props.notificationsTopic.topicArn, // Wired from main stack
       },
     });
 
-    // Grant permission for the Lambda to publish to the notifications topic.
+    // Allow Lambda to publish to the topic
     props.notificationsTopic.grantPublish(automationHandler);
 
     // -------------------------------------------------------------------------

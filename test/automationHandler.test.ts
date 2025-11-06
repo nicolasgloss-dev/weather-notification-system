@@ -26,7 +26,10 @@ describe("automationHandler Lambda", () => {
     beforeEach(() => {
         jest.clearAllMocks();
     });
-
+    // Restores original functions like Math.random
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
     // ---------------------------------------------------------------------------
     // Basic structure test — ensures the Lambda always returns a valid response.
     // ---------------------------------------------------------------------------
@@ -39,7 +42,7 @@ describe("automationHandler Lambda", () => {
 
     // ---------------------------------------------------------------------------
     // Storm case
-    // Cchecks that the Lambda handles “Storm” correctly and still returns success.
+    // Checks that the Lambda handles “Storm” correctly and still returns success.
     // Math.random() is mocked to a value that falls into the "Storm" branch.
     // ---------------------------------------------------------------------------
     test("handles Storm condition", async () => {
@@ -47,7 +50,6 @@ describe("automationHandler Lambda", () => {
         const result = await main({});
         expect(result.statusCode).toBe(200); // Should respond successfully
         expect(typeof result.condition).toBe("string"); // Should include condition
-        jest.spyOn(Math, "random").mockRestore();
     });
 
     // ---------------------------------------------------------------------------
@@ -59,7 +61,6 @@ describe("automationHandler Lambda", () => {
         jest.spyOn(Math, "random").mockReturnValue(0.3); // Simulate Rain case
         const result = await main({});
         expect(result.statusCode).toBe(200); // Should complete successfully
-        jest.spyOn(Math, "random").mockRestore();
     });
 
     // ---------------------------------------------------------------------------
@@ -73,6 +74,5 @@ describe("automationHandler Lambda", () => {
             const result = await main({});
             expect(result.statusCode).toBe(200);
         }
-        jest.spyOn(Math, "random").mockRestore();
     });
 });
