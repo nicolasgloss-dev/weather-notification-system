@@ -1,3 +1,12 @@
+// -----------------------------------------------------------------------------
+// File: weather-notification-system-stack.ts
+// Project: Smart Weather Notification & Automation System (Serverless AWS CDK)
+// Description: Core CDK stack deploying SNS Topic, FetchWeatherData Lambda,
+//              EventBridge rule for daily summaries, and Secrets Manager config.
+// Author: Nicolas Gloss
+// Last Updated: 2025-11-23
+// -----------------------------------------------------------------------------
+
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
@@ -133,7 +142,7 @@ export class WeatherNotificationSystemStack extends cdk.Stack {
     );
 
     // -------------------------------------------------------------------------
-    // Outputs - show useful info after deployment (helps verify resources).
+    // Outputs - helpful after deployment to verify resources.
     // -------------------------------------------------------------------------
     new cdk.CfnOutput(this, 'TopicArn', { value: this.notificationsTopic.topicArn });
     new cdk.CfnOutput(this, 'FunctionName', { value: fetchWeatherFn.functionName });

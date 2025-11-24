@@ -1,10 +1,14 @@
 // -----------------------------------------------------------------------------
-// automationHandler.test.ts
+// File: automationHandler.test.ts
+// Project: Smart Weather Notification & Automation System (Serverless AWS CDK)
+// Description: Unit tests for automationHandler Lambda. Validates behaviour under
+//              various weather conditions and ensures correct action responses.
+// Author: Nicolas Gloss
+// Last Updated: 2025-11-23
 // -----------------------------------------------------------------------------
-// This test file checks the logic of the automationHandler Lambda function.
-// It verifies that different weather conditions trigger the correct simulated
-// automation actions. Each test includes inline comments to explain purpose.
-// -----------------------------------------------------------------------------
+
+// This test file exercises the automationHandler Lambda logic and verifies
+// that different weather conditions return the expected automation behaviour.
 
 // -----------------------------------------------------------------------------
 // Mock the AWS SDK SNS client globally (before importing the handler).

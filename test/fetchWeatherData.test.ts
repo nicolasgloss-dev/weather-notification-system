@@ -1,3 +1,15 @@
+// -----------------------------------------------------------------------------
+// File: fetchWeatherData.test.ts
+// Project: Smart Weather Notification & Automation System (Serverless AWS CDK)
+// Description: Unit tests verifying correct operation of the weather data fetcher,
+//              including success scenarios and API failure handling.
+// Author: Nicolas Gloss
+// Last Updated: 2025-11-23
+// -----------------------------------------------------------------------------
+
+// This test suite validates success and failure scenarios for the weather
+// data fetcher Lambda, ensuring external API calls are handled safely.
+
 import { handler } from '../lambda/daily-summary/fetchWeatherData';
 import axios from 'axios';
 

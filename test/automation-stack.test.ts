@@ -1,18 +1,19 @@
+// -----------------------------------------------------------------------------
+// File: automation-stack.test.ts
+// Project: Smart Weather Notification & Automation System (Serverless AWS CDK)
+// Description: Tests ensuring that the Automation Stack defines the expected
+//              Lambda function and required IAM policies.
+// Author: Nicolas Gloss
+// Last Updated: 2025-11-23
+// -----------------------------------------------------------------------------
+
+// This test suite verifies that the Automation Stack correctly creates the
+// Lambda function, EventBridge rule, and required IAM permissions.
+
 import * as cdk from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
 import * as sns from 'aws-cdk-lib/aws-sns';
 import { WeatherAutomationStack } from '../lib/automation-stack';
-
-// -----------------------------------------------------------------------------
-// automation-stack.test.ts
-// -----------------------------------------------------------------------------
-// This test validates that the WeatherAutomationStack correctly defines
-// both the Lambda function and the EventBridge rule for automated tasks.
-//
-// It uses CDK assertions to ensure key properties such as the runtime,
-// schedule expression, and description are strictly validated. This prevents
-// configuration drift or silent regressions as the infrastructure evolves.
-// -----------------------------------------------------------------------------
 
 test('EventBridge Rule and Lambda Function are created for automation', () => {
   const app = new cdk.App();

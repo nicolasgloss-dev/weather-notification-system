@@ -1,3 +1,12 @@
+// -----------------------------------------------------------------------------
+// File: automation-stack.ts
+// Project: Smart Weather Notification & Automation System (Serverless AWS CDK)
+// Description: Defines the Automation Lambda, its IAM permissions, environment
+//              variables, and integrations with EventBridge and SNS.
+// Author: Nicolas Gloss
+// Last Updated: 2025-11-23
+// -----------------------------------------------------------------------------
+
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';

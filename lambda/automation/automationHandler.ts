@@ -1,13 +1,14 @@
 // -----------------------------------------------------------------------------
-// automationHandler.ts
+// File: automationHandler.ts
+// Project: Smart Weather Notification & Automation System (Serverless AWS CDK)
+// Description: Lambda handler responsible for evaluating weather conditions and
+//              triggering automated tasks or alerts (e.g., severe weather actions).
+// Author: Nicolas Gloss
+// Last Updated: 2025-11-23
 // -----------------------------------------------------------------------------
-// This Lambda simulates weather-based automation in AWS.
-// It’s triggered by an EventBridge rule (scheduled every few hours) and
-// performs different simulated actions depending on the weather condition.
-//
-// The goal here is to demonstrate how AWS Lambda can respond automatically
-// to environmental data or scheduled checks in a real system.
-// -----------------------------------------------------------------------------
+
+// This Lambda demonstrates how AWS can automate actions based on environment
+// data or scheduled checks, similar to real event-driven systems.
 
 import { SNSClient, PublishCommand } from "@aws-sdk/client-sns";
 

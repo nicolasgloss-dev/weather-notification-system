@@ -1,8 +1,18 @@
+// -----------------------------------------------------------------------------
+// File: fetchWeatherData.ts
+// Project: Smart Weather Notification & Automation System (Serverless AWS CDK)
+// Description: Lambda function that fetches live weather data from the external
+//              API using the stored secret key. Returns structured weather info
+//              for downstream automation functions.
+// Author: Nicolas Gloss
+// Last Updated: 2025-11-23
+// -----------------------------------------------------------------------------
+
 import axios from 'axios';
 import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 
-// NOTE: Daily summary Lambda — this runs at 7AM Sydney time (EventBridge cron).
-// It fetches weather data and will later publish a morning summary.
+// NOTE: This Lambda runs at 7AM Sydney time (via EventBridge cron).
+// It fetches weather data and will eventually publish the morning summary.
 
 const secretsClient = new SecretsManagerClient({}); // reuse client to avoid extra cold start cost
 

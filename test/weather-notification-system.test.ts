@@ -1,14 +1,18 @@
+// -----------------------------------------------------------------------------
+// File: weather-notification-system.test.ts
+// Project: Smart Weather Notification & Automation System (Serverless AWS CDK)
+// Description: Validates core infrastructure of the Weather Notification System
+//              Stack, including SNS, Lambda permissions, and IAM policy creation.
+// Author: Nicolas Gloss
+// Last Updated: 2025-11-23
+// -----------------------------------------------------------------------------
+
+// This test suite ensures the Weather Notification System stack creates all
+// required resources and assigns correct IAM permissions.
+
 import * as cdk from 'aws-cdk-lib';
 import { Template, Match } from 'aws-cdk-lib/assertions';
 import { WeatherNotificationSystemStack } from '../lib/weather-notification-system-stack';
-
-// -----------------------------------------------------------------------------
-// weather-notification-system.test.ts
-// -----------------------------------------------------------------------------
-// This test file ensures that the WeatherNotificationSystemStack defines
-// all expected core resources (SNS, Lambda, Secrets Manager).
-// DynamoDB checks have been removed as the table is now a future enhancement.
-// -----------------------------------------------------------------------------
 
 // Create the CDK app and stack once and reuse it across tests.
 const app = new cdk.App();
