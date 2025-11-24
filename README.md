@@ -1,229 +1,242 @@
 # ☁️ Smart Weather Notification & Automation System (AWS CDK)
-**Version:** 1.0 – Completed November 2025  
 
-This project implements a **modular, serverless, event-driven system** using AWS CDK (TypeScript) to:
-1. Send **daily weather summary emails**
-2. Push **urgent severe weather SMS alerts**
-3. Trigger **simulated AWS automation based on weather conditions**
+**Version 1.0 (November 2025)**  
 
-It demonstrates **real-world utility**, **IaC best practices**, and **creative automation logic**.
+A **modular, serverless, event-driven weather intelligence system** built using **AWS CDK (TypeScript)**.  
+This project demonstrates real-world cloud engineering skills, including event automation, secure API integration, scheduled workflows, SNS alerting, and full unit test coverage.
+
+This system performs three key functions:
+
+1. 🕖 **Daily weather summary emails**  
+2. ⚠️ **Severe weather alerts (planned module, not implemented in v1.0)**
+3. ⚙️ **Automated AWS actions triggered by weather conditions**
+
+It showcases **IaC best practices**, **secure design**, **scalable architecture**, and **creative automation logic**.
 
 ---
 
 ## 📌 System Overview
 
-This system gathers real-time weather data from an external API and automates alerting and response workflows using AWS services.
+The system retrieves live weather data from an external API and automates alerts or AWS actions based on conditions.
 
-- 🕕 **Daily Forecast Email:** Sends a scheduled summary email with conditions and optional temperature chart.  
-- ⚠️ **Severe Weather SMS:** Sends SMS alerts for dangerous weather (e.g. storms, heatwaves).  
-- ⚙️ **Weather-Aware Automation:** Simulates actions like pausing AWS tasks during poor sunlight/cloud cover.  
+- 🕕 **Daily Forecast Email:** Generated and sent every morning at 7 AM (Australia/Sydney)  
+- ⚠️ **Severe Weather Alerts (Planned)**: Architecture supports real-time SMS/email alerts for dangerous conditions. Not implemented in v1.0.
 
-Each function is designed as a separate, reusable module.
+- ⚙️ **Weather-Aware Automation:** Simulated AWS task automation based on cloudiness, sunlight, or storm severity  
+
+Each component is decoupled and designed as an independent module.
 
 ---
 
 ## 🧩 Module Details
 
-### 1. Daily Summary – Morning Forecast  
-Fetches weather data (via API) and stores it for daily reports or emails.
+### **1. Daily Summary — Morning Forecast**
+Fetches weather data and publishes a daily summary message.
 
-- **AWS Lambda:** `FetchWeatherDataFn`
-- **Secrets Manager:** Holds the external weather API key
-- **SNS Topic:** Publishes email notifications for the daily summary (via SES
-- **EventBridge Scheduler (Timezone-Aware):** Triggers the Lambda at 7:00 AM local Sydney time using `cron(0 7 * * ? *)` with `Australia/Sydney` timezone
+- **Lambda:** `FetchWeatherDataFn`
+- **Secrets Manager:** Holds external API key (OpenWeatherMap)
+- **SNS Topic:** Publishes email/SMS summary notifications
+- **EventBridge Scheduler:**  
+  - Timezone-aware  
+  - Cron: `cron(0 7 * * ? *)`  
+  - Runs at **7:00 AM Australia/Sydney**
 
-### 2. Severe Weather Alert – Urgent Notifications  
-Triggers SMS or email alerts for extreme conditions.
+---
 
-- **AWS Lambda:** `FetchWeatherDataFn` reused with severe alert logic  
-- Reuses the same **SNS Topic**
-- Future integration with **AWS Pinpoint** or **SES** possible
+### **2. Severe Weather Alerts — Future Enhancement**
+The architecture includes a planned module for **real-time severe weather alerts**.  
+This is *not implemented in v1.0*, but the design supports:
 
-### 3. AWS Automation – Weather-Aware Actions  
-Uses EventBridge + Lambda to simulate automatic responses (e.g. disable IoT devices during storms or trigger backups on clear days).
+- High wind detection  
+- Thunderstorm alerts  
+- Intense heat notifications  
+- Heavy rain and flood warnings  
 
-- **EventBridge Rule:** Fires every 3 hours
-- **AWS Lambda:** `AutomationHandler`
-- Demonstrates decoupled, event-driven automation logic
+Future implementation may reuse the existing `FetchWeatherDataFn` and SNS topic.
+
+---
+
+### **3. Weather-Driven Automation — Event-Based Actions**
+Simulates automated AWS tasks (e.g., disabling a system on cloudy days, running backups on clear days).
+
+- **EventBridge Rule:** Triggers every 3 hours
+- **Lambda:** `AutomationHandler`
+- Demonstrates event-driven automation with simulated effects
 
 ---
 
 ## 🧠 AWS Services Used
 
-| Service              | Purpose                              | Reason for Choice                          |
-|----------------------|--------------------------------------|--------------------------------------------|
-| AWS Lambda           | Runs the weather and automation logic | Serverless, scalable, pay-per-use          |
-| Amazon EventBridge   | Triggers periodic automation checks   | Simplifies scheduling and event flow       |
-| Amazon SNS           | Sends notifications and alerts        | Lightweight messaging layer                |
-| AWS Secrets Manager  | Stores API keys securely              | Secure, encrypted, and auditable           |
-| AWS CDK (TypeScript) | Infrastructure as Code                | Reusable, testable, modern IaC framework   |
+| Service              | Purpose                                     | Why This Service?                               |
+|----------------------|----------------------------------------------|--------------------------------------------------|
+| **AWS Lambda**       | Weather processing, automation logic          | Serverless, scalable, low operational overhead   |
+| **Amazon EventBridge** | Scheduling & event triggering              | Reliable, simple, timezone-aware scheduler       |
+| **Amazon SNS**       | Email/SMS notifications                      | Lightweight messaging with multiple subscribers  |
+| **AWS Secrets Manager** | Secure API key storage                    | Encrypted, auditable, rotation-ready             |
+| **AWS CDK (TypeScript)** | Infrastructure as Code                 | Testable, maintainable, version-controlled       |
 
 ---
 
 ## 📈 Expected Outcomes
 
-| Feature              | Outcome                                                                 |
-| -------------------- | ----------------------------------------------------------------------- |
-| Daily summary email  | Users receive a daily forecast summary via email                        |
-| Severe weather alert | Immediate SMS warning is sent when critical conditions are detected     |
-| Simulated automation | CloudWatch logs show appropriate AWS actions based on severe conditions |
+| Feature                | Outcome                                                                  |
+|------------------------|---------------------------------------------------------------------------|
+| Daily summary email    | Morning forecast delivered via SNS subscription                           |
+| Severe weather alert   | *(Planned)* Real-time severe alerts planned for future versions |
+| Simulated automation   | CloudWatch logs reflect weather-driven behavior (e.g., sunlight rules)    |
 
 ---
 
 ## ⚠️ Failure Scenarios & Mitigations
 
-| Scenario                   | Mitigation                                             |
-|----------------------------|--------------------------------------------------------|
-| Weather API unavailable    | Lambda logs error and skips publish instead of failing |
-| EventBridge rule misfire   | CloudWatch metrics monitor invocation counts           |
-| Invalid API key            | Rotated securely via Secrets Manager                  |
-| SNS subscription failure   | Alerts can be resent or tested manually using CLI      |
-| Weather API down           | Retry with backoff or fallback                         |
-| SES/SNS issues             | Retry + CloudWatch alarms                              |
-| Duplicate SMS alerts       | Timestamp-based de-duplication logic                   |
-| Lambda timeout             | Streamlined logic, small payloads                      |
-| Simulated task failure     | No real actions yet — logs only                        |
+| Scenario                   | Mitigation                                                            |
+|----------------------------|------------------------------------------------------------------------|
+| Weather API unavailable    | Lambda logs error; skips publish without failing system                |
+| EventBridge misfires       | CloudWatch metrics track invocation health                             |
+| Invalid or missing API key | Secure rotation & update via Secrets Manager                           |
+| SNS subscription failure   | Retry logic; can re-trigger manually using CLI or console              |
+| Weather API down           | Retry with exponential backoff or fallback message                     |
+| SNS/SES issues             | Alarms + retry logic                                                   |
+| Duplicate severe alerts *(planned)* | Deduplication logic documented for a future severe alerting module |
+| Lambda timeout             | Optimised logic; small payloads                                        |
+| Automation error           | Safe simulation mode — no real destructive actions                     |
 
 ---
 
 ## 🛡️ Cost Optimisation
 
-| Resource         | Cost Impact         | Optimisation Tip                            |
-|------------------|----------------------|----------------------------------------------|
-| Lambda           | Low                  | Keep logic small and execution short         |
-| Secrets Manager  | ~$0.40/mo per secret | Can use SSM Parameter Store for free         |
-| EventBridge      | Very low             | Fixed rate rule, no spike risk               |
-| SNS              | Pay-per-publish      | Use email if SMS costs too high              |
+| Resource         | Cost Impact         | Optimisation Idea                                 |
+|------------------|----------------------|----------------------------------------------------|
+| Lambda           | Low                  | Use small memory/runtime; short execution          |
+| Secrets Manager  | ~$0.40/mo per secret | Could use Parameter Store if cost-sensitive        |
+| EventBridge      | Very low             | Fixed schedule, predictable cost                   |
+| SNS              | Pay-per-publish      | Prefer email subscriptions during development      |
 
 ---
 
 ## 🔐 Security Considerations
 
-- Secrets encrypted in **AWS Secrets Manager**  
-- IAM roles follow **least privilege** principles (e.g. Lambda execution roles, SNS publish permissions)  
-- No public API Gateway or open endpoints  
+- Secrets stored securely in **AWS Secrets Manager**  
+- IAM follows **least privilege**  
+  (SNS publish only; SecretsManager read only for specific secret ARN)
+- No public endpoints  
+- EventBridge triggers are internal  
+- All communication is encrypted in transit & at rest
 
 ---
 
 ## 🧪 Testing
 
-| Test File                         | Purpose                                           |
-|----------------------------------|---------------------------------------------------|
-| `fetchWeatherData.test.ts`       | Validates weather fetch logic and error handling |
-| `automationHandler.test.ts`      | Simulates all weather conditions and SNS calls   |
-| `automation-stack.test.ts`       | Confirms EventBridge rule and Lambda creation    |
-| `weather-notification-system.test.ts` | End-to-end CDK stack validation              |
+Full Jest coverage for both **logic** and **infrastructure**:
+
+| Test File                               | Purpose                                             |
+|------------------------------------------|-----------------------------------------------------|
+| `fetchWeatherData.test.ts`               | Weather API logic, error handling                   |
+| `automationHandler.test.ts`              | Weather condition simulation & automation rules     |
+| `automation-stack.test.ts`               | EventBridge + Lambda resource creation tests        |
+| `weather-notification-system.test.ts`    | End-to-end CDK stack validation                     |
+
+All test suites pass successfully.
 
 ---
 
 ## 🏗️ Architecture Diagram
 
-![High Level Architecture](docs/diagrams/architecture.png)
+The diagram includes both implemented components and future planned modules (such as the Severe Alerts system) to show the full intended design.
+
+![Architecture Diagram](docs/diagrams/architecture.png)
 
 ---
 
 ## 📷 Screenshots
 
-### ✅ Unit Tests Passing
-![Unit Tests](docs/screenshots/jest-tests-passing.png)  
-*Jest tests confirming all stacks and logic behave as expected.*
+### 🧪 Unit Tests Passing  
+![Unit Tests](docs/screenshots/jest-tests-passing.png)
 
----
+### 🔍 CloudWatch Logs – AutomationHandler  
+![Lambda Logs](docs/screenshots/lambda-cloudwatch.png)
 
-### 📘 Lambda AutomationHandler Logs
-![Lambda Logs](docs/screenshots/lambda-cloudwatch.png)  
-*CloudWatch logs showing simulated weather automation actions.*
+### ⏰ EventBridge Automation Rule  
+![EventBridge Rule](docs/screenshots/eventbridge-rule.png)
 
----
+### 🕖 EventBridge Scheduler – Daily Summary  
+![Scheduler](docs/screenshots/scheduler-7am.png)
 
-### ⏰ EventBridge Rule Configuration
-![EventBridge Rule](docs/screenshots/eventbridge-rule.png)  
-*EventBridge rule triggering the automation Lambda every 3 hours.*
+### 📡 SNS Topic Setup  
+![SNS](docs/screenshots/sns-topic.png)
 
----
+### ⚙️ Lambda Function Configuration  
+![Lambda Config](docs/screenshots/lambda-config.png)
 
-### 🕖 EventBridge Scheduler – Daily Summary
-![EventBridge Scheduler](docs/screenshots/scheduler-7am.png)  
-*EventBridge Scheduler set to run at 7:00 AM Australia/Sydney using a timezone-aware cron expression.*
-
----
-
-### 📡 SNS Topic Setup
-![SNS](docs/screenshots/sns-topic.png)  
-*SNS topic configured and subscribed for alerting modules.*
-
----
-
-### ⚙️ Lambda Function Configuration
-![Lambda Details](docs/screenshots/lambda-config.png)  
-*AutomationHandler Lambda setup with memory, trigger, and IAM role.*
-
----
-
-### 🧪 Lambda Test Execution
-![Lambda Test](docs/screenshots/lambda-test-success.png)  
-*Successful Lambda test execution simulating a weather event.*
+### 🧪 Lambda Test Execution  
+![Lambda Test](docs/screenshots/lambda-test-success.png)
 
 ---
 
 ## 💡 Possible Enhancements
 
-- Integrate **DynamoDB** to persist user-specific weather preferences or automation thresholds (e.g. locations, alert types). Currently, thresholds are hardcoded for simplicity  
-- Connect to **Amazon Bedrock** for AI-driven weather summaries  
-- Add a **React dashboard** for forecast history and manual controls  
-- Trigger real-world actions using **SSM Automation** or **AWS IoT Core**  
-- Use **Step Functions** to manage complex or chained automation workflows  
-- Expand support to **multiple locations and time zones**  
-- Use **Amazon Pinpoint** or enhanced **SES** for rich HTML email templates  
-- 🔁 **Switch EventBridge rule to SNS-driven triggers** for real-time weather reactions instead of schedule-based simulations  
-- 🔌 **Integrate AWS IoT or SSM** to simulate real automation (e.g., shutdown, reboot, failover, backup)  
+- Add **DynamoDB** for user preferences or alert thresholds  
+- Add **Amazon Bedrock** for AI-enhanced weather summaries  
+- Add a **React dashboard** for forecast history  
+- Integrate **AWS IoT** for real device automation  
+- Add multi-region/multi-city support  
+- Add **Step Functions** for complex automation chains  
+- Use **Pinpoint** for rich SMS notifications  
+- Switch from schedule-based to real-time event triggers  
 
 ---
 
 ## 🧱 Challenges & Solutions
 
-| Challenge                     | Solution                                               |
-|------------------------------|--------------------------------------------------------|
-| API rate limits              | Retry logic with exponential backoff                  |
-| Cross-stack topic reference  | Used CDK stack outputs to pass SNS topic ARN across modules |
-| SNS permissions for Lambda   | Used `grantPublish` helper for secure access          |
-| Testing edge cases           | Simulated dummy data with manual test events          |
-| Avoiding duplicate alerts    | Timestamp filtering logic in Lambda                   |
-| Secrets handling             | Encrypted and rotated via AWS Secrets Manager         |
-| Modular project structure    | Separated by stack (email, alerts, automation)        |
+| Challenge                                          | Solution                                                                                           |
+|----------------------------------------------------|----------------------------------------------------------------------------------------------------|
+| API rate limits                                    | Implemented exponential backoff and error handling in the Lambda to avoid cascading failures.      |
+| Cross-stack integration                             | Passed SNS Topic ARN cleanly through CDK stack props to maintain modularity and decoupling.        |
+| SNS publish permissions                             | Used `grantPublish` to enforce least-privilege IAM policies for Lambda functions.                  |
+| Testing edge cases                                  | Mocked axios and AWS SDK v3 clients to simulate weather API failures and controlled responses.     |
+| Duplicate severe alerts (design consideration) | Documented deduplication logic as a future enhancement for the planned severe alerting module |
+| Secure API key usage                                 | Retrieved API key securely at runtime from Secrets Manager with a strict secret-specific IAM policy. |
+| Modular architecture                                 | Designed separate stacks for summary, alerts, and automation to improve maintainability.           |
+| Timezone-aware scheduling                            | Used EventBridge Scheduler to support explicit `Australia/Sydney` timezone cron expressions, unlike standard EventBridge rules. |
+| AWS SDK v3 mocking complexity                        | Added global Jest mocks before importing handlers to prevent AWS SDK v3 dynamic-import failures.   |
+| Avoiding Docker bundling issues on Windows           | Set `forceDockerBundling: false` in NodejsFunction to ensure fast, reliable local esbuild bundling without Docker. |
+| DynamoDB architectural decision                      | Removed DynamoDB from the core system and documented it as a future enhancement for cleaner scope. |
 
 ---
 
 ## 🛠️ Improvements Added
 
-- Split architecture into **three modular CDK stacks**  
-- Added **SNS topic and subscriptions** for alerting  
-- Used **Secrets Manager** for secure key handling  
-- Introduced **timestamp filtering** for alert deduplication  
-- Created **Jest unit tests** for logic and infrastructure 
+- Modular multi-stack architecture  
+- SNS topic + subscription system  
+- Secrets Manager integration  
+- Full Jest unit test coverage  
+- EventBridge Automation + Scheduler  
+- Timezone-aware execution  
 
 ---
 
 ## 🧹 Clean-Up Steps
 
-1. Delete EventBridge rules and Lambda functions  
-2. Delete SNS topics and subscriptions  
-3. Remove Secrets Manager entry  
-4. Delete IAM roles and policies 
+1. Delete EventBridge rules  
+2. Delete Lambda functions  
+3. Delete SNS topics & subscriptions  
+4. Delete the Secrets Manager secret  
+5. Delete IAM roles and policies  
+6. Remove CloudWatch log groups  
 
 ---
 
 ## 🪞 Reflection / Lessons Learned
 
-- Modular stacks simplify future upgrades (e.g. AI, IoT)  
-- Testing early avoids pain later – Jest caught key errors  
-- Simulated logs are useful for designing automation safely  
-- AWS CDK helps express intent clearly, especially for beginners  
+- Modular stacks dramatically simplify project growth  
+- Testing early catches architectural issues before deployment  
+- Logging is essential when designing automation systems  
+- CDK provides clarity and maintainability for complex serverless apps  
 
 ---
 
 ## 🔗 Project Links
 
-> **Project Page:** [nicolasgloss.com/projects/weather-notification-system](https://nicolasgloss.com/projects/serverless-weather)  
-> **GitHub Repo:** [github.com/nicolasgloss-dev/weather-notification-system](https://github.com/nicolasgloss-dev/weather-notification-system)  
-> **Architecture Decision Log (ADR):** [weather-notification-system/docs/adr.md](https://github.com/nicolasgloss-dev/weather-notification-system/blob/main/docs/adr.md)
+- **Project Page:** https://nicolasgloss.com/projects/serverless-weather  
+- **GitHub Repo:** https://github.com/nicolasgloss-dev/weather-notification-system  
+- **Architecture Decision Record (ADR):** `/docs/adr.md`
