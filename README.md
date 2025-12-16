@@ -239,4 +239,4 @@ The diagram includes both implemented components and future planned modules (suc
 
 - **Project Page:** https://nicolasgloss.com/projects/serverless-weather  
 - **GitHub Repo:** https://github.com/nicolasgloss-dev/weather-notification-system  
-- **Architecture Decision Record (ADR):** `/docs/adr.md`
+- **Architecture Decision Record (ADR):** [docs/adr.md](docs/adr.md)
